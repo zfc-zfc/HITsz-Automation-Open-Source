@@ -1,0 +1,713 @@
+\input etexinfo			@c -*-texinfo-*-
+@c
+@c screws.txi - screws package for mathematica
+@c
+@c Richard M. Murray
+@c 7 December 1991
+@c
+@c
+
+@setfilename screws.info
+@settitle Screws.m
+
+@c put function entries in main index
+@synindex fn cp
+
+@titlepage
+@center @titlefont{Screws.m}
+@sp 1
+@center {@chaprm Robot kinematics package for Mathematica}
+@sp 1
+@center Version 1.2
+@center December 1992
+@sp 2
+@center Richard M. Murray
+@center Division of Engineering and Applied Science
+@center California Institute of Technology
+@center Pasadena, CA 91125
+@center murray@@design.caltech.edu
+@sp 2
+@center Sudipto Sur
+@center Division of Engineering and Applied Science
+@center California Institute of Technology
+@center Pasadena, CA 91125
+
+@finalout
+@end titlepage
+
+@node Top,,,(dir)
+@ifinfo
+@example
+    *** Screws.m - Robot kinematics package for Mathematica ***
+@end example
+
+@file{Screws.m} is a Mathematica package for using screws, twists, and
+wrenches to analyze robot kinematics.  It is intended to be used in
+conjuction with the text, @cite{A Mathematical Introduction to Robotic
+Manipulation}, by R. M. Murray, Z. Li, and S. S. Sastry, (CRC Press,
+1994).  This file describes version 1.2 of the software.
+@end ifinfo
+
+@menu
+* Introduction::		Introduction to the Screws.m package
+* Rigid Body Motion::		Functions for manipulating rigid motions
+* Robot Kinematics::		Forward and inverse kinematics
+
+* Reference::			Listing of all functions, options
+@end menu
+
+@node Introduction,Rigid Body Motion,,Top
+@chapter Introduction
+
+@code{Screws.m} is a Mathematica package for performing screw calculus.
+It follows the treatment described in @cite{A Mathematical Introduction
+to Robotic Manipulation}, by R. M. Murray, Z. Li, and S.  S. Sastry (CRC
+Press, 1994).  This package implements screw theory in 3-dimensional
+Euclidean space (some functions work in n dimensions) and, when combined
+with the supplementary package @code{RobotLinks.m}, allows symbolic and
+numerical computation of the kinematics of open-chain robot manipulators
+as well as many other functions.
+
+The @code{Screws} package is available via anonymous ftp from 
+@code{avalon.caltech.edu} and may be used free of charge.  Documentation
+and installation instructions are included with the source code for the
+package.  The @code{Screws} package was written by R. Murray and S. Sur
+at the California Institute of Technology.  All correspondence
+concerning the software should be sent to via e-mail to
+@code{murray@@avalon.caltech.edu}.  The authors assume no responsibility
+for the correctness or maintenance of the @code{Screws} package.  The
+source code is currently available @emph{only} via anonymous ftp.
+
+The @code{Screws} package implements screw theory in 3-dimensional
+Euclidean space, R^3.  It uses homogeneous coordinates to
+represent points, vectors, and rigid motions, making it easy to
+integrate into other Mathematica packages.
+
+@node Rigid Body Motion,Robot Kinematics,Introduction,Top
+@chapter Rigid Body Motion
+
+The @code{Screws} package consists of two groups of functions.  The
+first group operates on rotation matrices and implements all of the
+mathematical operations described in Section 2 of Chapter 2 of MLS.
+The following functions are defined for computing in SO(3):
+
+@table @code
+@item AxisToSkew[w]
+Generate a skew-symmetric matrix give a vector @code{w} in R^3
+
+@item RotationAxis[R]
+Calculate the axis of rotation for a matrix @code{R} in SO(3).
+
+@item SkewExp[S, theta]
+Calculate the exponential of a skew-symmetric matrix.  If @code{theta}
+is not specified, it defaults to 1.  If the first argument to
+@code{SkewExp} is a vector, @code{SkewExp} first converts it to a
+skew-symmetric matrix and then takes its exponential.
+
+@item SkewToAxis[S]
+Generates a vector given a skew-symmetric matrix.
+@end table
+
+@noindent
+Limited error checking is used to insure that the arguments to the
+functions are in the proper form.
+
+The second group of functions implements calculations on SE(3).
+Rigid body transformations are represented using 4x4
+matrices.  Functions are provided for transforming points and vectors
+to and from homogeneous coordinates, as well as converting a
+translation and rotation pair into a 4x4 matrix.  The following
+functions are defined for use in SE(3):
+
+@table @code
+@item HomogeneousToTwist[xi]
+Convert @code{xi} from a 4x4 matrix to a 6-vector.
+
+@item PointToHomogeneous[q]
+Generate the homogeneous
+representation of a point @code{q} in R^3.
+
+@item RigidAdjoint[g]
+Generate the adjoint matrix corresponding
+to @code{g}. 
+
+@item RigidOrientation[g]
+Extract the rotation matrix
+@code{R} from a homogeneous matrix @code{g}. 
+
+@item RigidPosition[g]
+Extract the position vector @code{p} from
+a homogeneous matrix @code{g}.
+
+@item RigidTwist[g]
+Compute the twist @code{xi} in R^6 which generates the
+homogeneous matrix @code{g}.
+
+@item RPToHomogeneous[R,p]
+Construct a 4x4
+homogeneous matrix from a rotation matrix @code{R} and a translation
+@code{p}. 
+
+@item ScrewToTwist[h, q, w]
+Return the twist coordinates of
+a screw with pitch @code{h} through the point @code{q} and in the
+direction @code{w}.  If @code{h == Infinity}, then a pure
+translational twist is generated.  In this case, @code{q} is ignored
+and @code{w} gives the direction of translation.
+
+@item TwistAxis[xi]
+Compute the axis of the screw corresponding to
+a twist. The axis is represented as a pair @code{@{q, w@}}, where
+@code{q} is a point on the axis and @code{w} is a unit vector
+describing the direction of the axis.  The twist @code{xi} can be
+specified either as a 6-vector or a 4x4 matrix.
+
+@item TwistExp[xi, theta]
+Compute the matrix exponential of a
+twist @code{xi}. The default value of @code{theta} is 1.  If the
+first argument to @code{TwistExp} is a 6-vector, it is automatically
+converted to a 4x4 matrix.
+
+@item TwistPitch[xi]
+Compute the pitch of a twist.
+
+@item TwistMagnitude[xi]
+Compute the magnitude of a twist.
+
+@item TwistToHomogeneous[xi]
+Convert @code{xi} from a 6-vector to a 4x4 matrix.
+
+@item VectorToHomogeneous[q]
+Generate the homogeneous representation of a vector. 
+@end table
+
+@noindent
+Limited error checking is used to insure that the arguments to the
+functions are in the proper form.
+
+@node Robot Kinematics,Reference,Rigid Body Motion,Top
+@chapter Robot Kinematics
+
+The functions defined in the @code{Screws} package can be used to
+analyze the kinematics of a robot manipulator.  This section describes
+this process and defines some new functions which streamline the
+analysis of manipulator kinematics.  These functions are contained in
+the package @file{RobotLinks.m}.
+
+The forward kinematics for a robot manipulator can be written as a
+product of exponentials (of twists).  The following functions are
+defined for creating twists specifically for robot manipulators:
+
+@table @code
+@item RevoluteTwist[q, w]
+Construct a twist corresponding to a revolute joint in the direction
+@code{w} going through the point @code{q}.
+
+@item PrismaticTwist[q, w]
+Construct a twist corresponding to a prismatic joint in the direction
+@code{w} going through the point @code{q}.
+@end table
+
+Once the twists are defined, the forward kinematic map and the
+manipulator Jacobian can be calculated using matrix multiplication
+combined with the @code{TwistExp} and @code{RigidAdjoint} functions.
+These computations are automated by the following functions:
+
+@table @code
+@item ForwardKinematics[@{xi1, th1@}, @{xi2, th2@}, ..., gst0]
+Compute the forward kinematics map using the product of exponentials
+formula.  The pairs @code{@{xi, th@}} define the joint twist and
+joint angle (or displacement) for each joint of the manipulator.
+
+@item SpatialJacobian[@{xi1, th1@}, @{xi2, th2@}, ..., gst0]
+Compute the spatial manipulator Jacobian for the manipulator.
+The pairs @code{@{xi, th@}} are given as in the
+@code{ForwardKinematics} function.
+@end table
+
+@noindent
+An example of the usage of @code{Screws} and @code{RobotLinks} packages
+is shown below for computing the kinematics of a SCARA manipulator.
+
+@example
+<<Screws.m                       (* screws package       *)
+<<RobotLinks.m                   (* additional functions *)
+
+(* Twist axes for SCARA robot, starting from the base *)
+xi1 = RevoluteTwist[@{0,0,0@},     @{0,0,1@}];      (* base  *)
+xi2 = RevoluteTwist[@{0,l1,0@},    @{0,0,1@}];      (* elbow *)
+xi3 = RevoluteTwist[@{0,l1+l2,0@}, @{0,0,1@}];      (* wrist *)
+xi4 = PrismaticTwist[@{0,0,0@},    @{0,0,1@}];
+
+(* Location of the tool frame at reference configuration *)
+gst0 = RPToHomogeneous[IdentityMatrix[3], @{0,l1+l2,0@}];
+
+(* Forward kinematics map *)
+gst = Simplify[
+  ForwardKinematics[
+    @{xi1,th1@}, @{xi2,th2@}, @{xi3,th3@}, @{xi4,th4@}, gst0
+  ]
+];
+
+(* Spatial manipulator Jacobian *)
+Js  = Simplify[
+  SpatialJacobian[@{xi1,th1@}, @{xi2,th2@}, @{xi3,th3@}, @{xi4,th4@}, gst0]
+];
+@end example
+
+@c
+@c Reference section
+@c
+@c Each entry in this section is formatted as follows
+@c
+@c 	Node description
+@c	@bullet@ @code{Command name}
+@c	Command description (@quotation)
+@c
+@c The three sections should be separated by spaces to get things to
+@c look right in the printed manual.
+
+@page
+@node Reference,,Robot Kinematics,Top
+@chapter Reference
+
+This section gives an alphabetical list of the commands and options
+defined in @file{Simulate.m}.
+
+@menu
+* AxisSize::		set the length of an axis vector for DrawFrame
+* AxisToSkew::		generate 3x3 skew-symmetric matrix from vector
+* BodyJacobian::	compute body manipulator Jacobian
+* DrawFrame::		generate a graphical description of a coordinate frame
+* DrawScrew::		generate a graphical description of a screw
+* ForwardKinematics::	compute the kinematics using product of exponentials
+* HomogeneousToTwist::	convert homogeneous repreentation of twist to 6 vector
+* InertiaToCoriolis::	compute the Coriolis matrix from the inertia matrix
+* PointToHomogeneous::	representation of a point in homogeneous coordinates
+* PrismaticTwist::	generate twist corresponding to a prismatic joint
+* RevoluteTwist::	generate twist corresponding to a revolute joint
+* RPToHomogeneous::	homogeneous representation of a (R, p) pair
+* RigidAdjoint::	find the 6x6 adjoint matrix of a rigid motion
+* RigidInverse::        inverse rigid body transformation
+* RigidOrientation::	extract rotation matrix from rigid motion
+* RigidPosition::	extract position vector from rigid motion
+* RigidTwist::		find the twist associated with a rigid motion
+* RotationAxis::	find the axis of rotation for a rotation matrix
+* RotationQ::		test if a matrix is a rotation matrix
+* ScrewSize::		set the length of a screw for DrawScrew
+* ScrewToTwist::	return twist coordinates of a screw
+* SkewExp::		matrix exponential of a skew-symmetrix matrix
+* SkewToAxis::		generate vector from 3x3 skew-symmetrix matrix
+* SpatialJacobian::	compute spatial manipulator Jacobian
+* StackCols::		stack matrix columns
+* StackRows::		stack matrix rows 
+* TwistAxis::		find the axis of a twist
+* TwistExp::		matrix exponential of twist
+* TwistMagnitude::	find the magnitude of a twist
+* TwistPitch::		find the pitch of a twist
+* TwistToHomogeneous::	convert 6-vector to 4x4 matrix
+* VectorToHomogeneous::	representation of a vector in homogeneous coordinates
+@end menu
+
+@c -------- AxisSize
+@node AxisSize,AxisToSkew,,Reference
+@findex AxisSize
+@bullet{} @code{AxisSize}
+
+@quotation
+@code{AxisSize} is an option to @code{DrawFrame} which sets the length
+of an axis.
+@end quotation
+
+@c -------- AxisToSkew
+@node AxisToSkew,BodyJacobian,AxisSize,Reference
+@findex AxisToSkew
+@bullet{} @code{AxisToSkew}
+
+@quotation
+@code{AxisToSkew[w]} generates a skew-symmetric matrix given a 3-vector
+@code{w}.
+
+@code{AxisToSkew} returns a 3x3 matrix which represents the cross product operator.
+@refill
+
+@end quotation
+
+@c -------- BodyJacobian
+@node BodyJacobian,DrawFrame,AxisToSkew,Reference
+@findex BodyJacobian
+@bullet{} @code{BodyJacobian}
+
+@quotation
+@code{BodyJacobian[@{xi1,th1@},@{xi2,th2@},...,g0]} computes the body 
+manipulator Jacobian of a robot defined by the given twists.
+
+This function is part of the @code{RobotLinks.m} package.
+@end quotation
+
+@c -------- DrawFrame
+@node DrawFrame,DrawScrew,BodyJacobian,Reference
+@findex DrawFrame
+@bullet{} @code{DrawFrame}
+
+@quotation
+@code{DrawScrew[q, w, h]} generates a graphical description of a screw.
+@end quotation
+
+@c -------- DrawScrew
+@node DrawScrew,ForwardKinematics,DrawFrame,Reference
+@findex DrawScrew
+@bullet{} @code{DrawScrew}
+
+@quotation
+@code{DrawScrew[q, w, h]} generates a graphical description of a screw.
+@end quotation
+
+@c -------- ForwardKinematics
+@node ForwardKinematics,HomogeneousToTwist,DrawScrew,Reference
+@findex ForwardKinematics
+@bullet{} @code{ForwardKinematics}
+
+@quotation
+@code{ForwardKinematics[@{xi1,th1@},...,@{xiN,thN@},g0]} computes the
+forward kinematics via the product of exponentials formula.
+@end quotation
+
+@c -------- HomogeneousToTwist
+@node HomogeneousToTwist,InertiaToCoriolis,ForwardKinematics,Reference
+@findex HomogeneousToTwist
+@bullet{} @code{HomogeneousToTwist}
+
+@quotation
+@code{HomogeneousToTwist[xi]} converts xi from a 4x4 matrix to a 6 vector.
+
+@end quotation
+
+@c -------- InertiaToCoriolis
+@node InertiaToCoriolis,PointToHomogeneous,HomogeneousToTwist,Reference
+@findex InertiaToCoriolis
+@bullet{} @code{InertiaToCoriolis}
+
+@quotation
+@code{InertiaToCoriolis[M, theta]} computes the Coriolis matrix given the 
+inertia matrix, M, and a list of the joint variables, theta.
+
+This function is part of the @code{RobotLinks.m} package.
+@end quotation
+
+@c -------- PointToHomogeneous
+@node PointToHomogeneous,PrismaticTwist,InertiaToCoriolis,Reference
+@findex PointToHomogeneous
+@bullet{} @code{PointToHomogeneous}
+
+@quotation
+@code{PointToHomogeneous[q]} gives the homogeneous representation of a point.
+
+@code{PointToHomogeneous} converts a point in Euclidean space
+to its homogeneous representation by appending a `1' to the vector.
+@refill
+
+@end quotation
+
+@c -------- PrismaticTwist
+@node PrismaticTwist,RevoluteTwist,PointToHomogeneous,Reference
+@findex PrismaticTwist
+@bullet{} @code{PrismaticTwist}
+
+@quotation
+@code{PrismaticTwist[q,w]} gives the 6-vector corresponding to point q 
+on the axis and a screw with axis w for a prismatic joint.
+
+This function is part of the @code{RobotLinks.m} package.
+@end quotation
+
+@c -------- RevoluteTwist
+@node RevoluteTwist,RPToHomogeneous,PrismaticTwist,Reference
+@findex RevoluteTwist
+@bullet{} @code{RevoluteTwist}
+
+@quotation
+@code{RevoluteTwist[q,w]} gives the 6-vector corresponding to point q on 
+the axis and a screw with axis w for a revolute joint.
+
+This function is part of the @code{RobotLinks.m} package.
+@end quotation
+
+@c -------- RPToHomogeneous
+@node RPToHomogeneous,RigidAdjoint,RevoluteTwist,Reference
+@findex RPToHomogeneous
+@bullet{} @code{RPToHomogeneous}
+
+@quotation
+@code{RPToHomogeneous[R,p]} forms homogeneous matrix from rotation
+matrix R and position vector p.
+
+@code{RPToHomogeneous} converts an element (R, p) in SE(3) into a 4x4 matrix.
+@refill
+
+@end quotation
+
+@c -------- RigidAdjoint
+@node RigidAdjoint,RigidInverse,RPToHomogeneous,Reference
+@findex RigidAdjoint
+@bullet{} @code{RigidAdjoint}
+
+@quotation
+@code{RigidAdjoint[g]} gives the adjoint matrix corresponding to g.
+
+@code{RigidAdjoint} constructs a 6x6 matrix which represents the adjoint
+of the rigid transformation @code{g}.  The rigid transformation @code{g}
+should be a 4x4 homogeneous matrix representing and element of SE(3).
+@xref{RPToHomogeneous}
+@refill
+
+@end quotation
+
+@c -------- RigidInverse
+@node RigidInverse,RigidOrientation,RigidAdjoint,Reference
+@findex RigidInverse
+@bullet{} @code{RigidInverse}
+
+@quotation
+@code{RigidInverse[g]} gives the inverse transformation of g.
+@end quotation
+
+@c -------- RigidOrientation
+@node RigidOrientation,RigidPosition,RigidInverse,Reference
+@findex RigidOrientation
+@bullet{} @code{RigidOrientation}
+
+@quotation
+@code{RigidOrientation[g]} extracts the rotation matrix @code{R} from @code{g}.
+
+@code{RigidOrientation} extracts the rotation component of a rigid
+motion from the 4x4 homogeneous matrix @code{g}.
+@xref{RigidPosition}.
+@refill
+
+@end quotation
+
+@c -------- RigidPosition
+@node RigidPosition,RigidTwist,RigidOrientation,Reference
+@findex RigidPosition
+@bullet{} @code{RigidPosition}
+
+@quotation
+@code{RigidPosition[g]} extracts the position vector @code{p} from @code{g}.
+
+@code{RigidPosition} extracts the translational component of a rigid
+motion from the 4x4 homogeneous matrix @code{g}.
+@xref{RigidOrientation}.
+@refill
+
+@end quotation
+
+@c -------- RigidTwist
+@node RigidTwist,RotationAxis,RigidPosition,Reference
+@findex RigidTwist
+@bullet{} @code{RigidTwist}
+
+@quotation
+@code{RigidTwist[g]} returns an equivalent twist given a rigid motion @code{g}.
+
+@code{RigidTwist} calculates a twist which generates the rigid motion
+@code{g}.  This twist is not unique.
+@refill
+
+@end quotation
+
+@c -------- RotationAxis
+@node RotationAxis,RotationQ,RigidTwist,Reference
+@findex RotationAxis
+@bullet{} @code{RotationAxis}
+
+@quotation
+@code{RotationAxis[R]} finds the rotation axis for a rotation matrix.
+
+@code{RotationAxis} finds an equivalent axis for a given rotation
+matrix.
+@refill
+
+@end quotation
+
+@c -------- RotationQ
+@node RotationQ,ScrewSize,RotationAxis,Reference
+@findex RotationQ
+@bullet{} @code{RotationQ}
+
+@quotation
+@code{RotationQ[M]} tests wether a matrix @code{M} is a rotation matrix.
+
+@code{RotationQ} checks to see if @code{M} is a 3x3 matrix which satisfies
+@code{Transpose[M] . M == IdentityMatrix[3]} and @code{Det[M] == 1}.
+@code{RotationQ} may return @code{False} for non-numeric matrices.
+@refill
+
+@end quotation
+
+@c -------- ScrewSize
+@node ScrewSize,ScrewToTwist,RotationQ,Reference
+@findex ScrewSize
+@bullet{} @code{ScrewSize}
+
+@quotation
+@code{ScrewSize} is an option for @code{DrawScrew} which sets the length
+of a screw.
+@end quotation
+
+@c -------- ScrewToTwist
+@node ScrewToTwist,SkewExp,ScrewSize,Reference
+@findex ScrewToTwist
+@bullet{} @code{ScrewToTwist}
+
+@quotation
+@code{ScrewToTwist[h, q, w]} returns the twist coordinates of a screw.
+@end quotation
+
+@c -------- SkewExp
+@node SkewExp,SkewToAxis,ScrewToTwist,Reference
+@findex SkewExp
+@bullet{} @code{SkewExp}
+
+@quotation
+@code{SkewExp[w, theta]} gives the matrix exponential of an axis
+@code{w}.  Default value of @code{theta} is 1.
+
+@code{SkewExp} uses Rodriguez's formula to calculate the matrix
+exponential of a skew-symmetric matrix.  @code{w} can either be a
+3-vector or a skew-symmetrix matrix.
+@refill
+
+@end quotation
+
+@c -------- SkewToAxis
+@node SkewToAxis,SpatialJacobian,SkewExp,Reference
+@findex SkewToAxis
+@bullet{} @code{SkewToAxis}
+
+@quotation
+@code{SkewToAxis[S]} extracts a vector from a skew-symmetric matrix S.
+
+@code{SkewToAxis} extracts a 3-vector from a 3x3 skew-symmetric matrix.
+@refill
+
+@end quotation
+
+@c -------- SpatialJacobian
+@node SpatialJacobian,StackCols,SkewToAxis,Reference
+@findex SpatialJacobian
+@bullet{} @code{SpatialJacobian}
+
+@quotation
+@code{SpatialJacobian[@{xi1,th1@},@{xi2,th2@},...,g0]} computes the spatial 
+manipulator Jacobian of a robot defined by the given twists.
+
+This function is part of the @code{RobotLinks.m} package.
+@end quotation
+
+@c -------- StackCols
+@node StackCols,StackRows,SpatialJacobian,Reference
+@findex StackCols
+@bullet{} @code{StackCols}
+
+@quotation
+@code{StackCols[mat1, mat2, ...]} stacks matrix columns together
+@end quotation
+
+@c -------- StackRows
+@node StackRows,TwistAxis,StackCols,Reference
+@findex StackRows
+@bullet{} @code{StackRows}
+
+@quotation
+@code{StackRows[mat1, mat2, ...]} stacks matrix rows together
+@refill
+
+@end quotation
+
+@c -------- TwistAxis
+@node TwistAxis,TwistExp,StackRows,Reference
+@findex TwistAxis
+@bullet{} @code{TwistAxis}
+
+@quotation
+@code{TwistAxis[xi]} gives axis of a screw corresponding to a twist.
+@end quotation
+
+@c -------- TwistExp
+@node TwistExp,TwistMagnitude,TwistAxis,Reference
+@findex TwistExp
+@bullet{} @code{TwistExp}
+
+@quotation
+@code{TwistExp[xi, theta]} gives the matrix exponential of a twist
+@code{xi}.  Default value of @code{theta} is 1.
+
+@code{TwistExp} computes the matrix exponential of a twist.  The twist
+may be specified as either a 6-vector (which will be converted to a 4x4
+matrix with @code{TwistToHomogeneous}) or a 4x4 twist matrix.
+@refill
+
+@end quotation
+
+@c -------- TwistMagnitude
+@node TwistMagnitude,TwistPitch,TwistExp,Reference
+@findex TwistMagnitude
+@bullet{} @code{TwistMagnitude}
+
+@quotation
+@code{TwistMagnitude[xi]} returns the magnitude of a twist.
+@end quotation
+
+@c -------- TwistPitch
+@node TwistPitch,TwistToHomogeneous,TwistMagnitude,Reference
+@findex TwistPitch
+@bullet{} @code{TwistPitch}
+
+@quotation
+@code{TwistPitch[xi]} returns the pitch of a twist.
+
+@code{TwistPitch} returns the pitch of a twist vector or matrix.  An
+inifinite pitch twist returns @code{Inifinity}.
+@refill
+
+@end quotation
+
+@c -------- TwistToHomogeneous
+@node TwistToHomogeneous,VectorToHomogeneous,TwistPitch,Reference
+@findex TwistToHomogeneous
+@bullet{} @code{TwistToHomogeneous}
+
+@quotation
+@code{TwistToHomogeneous[xi]} converts @code{xi} from a 6 vector to a
+4X4 matrix.
+
+@code{TwistToHomogeneous} converts a twist to its 4x4 homogeneous
+representation.
+@refill
+
+@end quotation
+
+@c -------- VectorToHomogeneous
+@node VectorToHomogeneous,,TwistToHomogeneous,Reference
+@findex VectorToHomogeneous
+@bullet{} @code{VectorToHomogeneous}
+
+@quotation
+@code{VectorToHomogeneous[q]} gives the homogeneous representation of a point.
+
+@code{VectorToHomogeneous} converts a point in Euclidean space
+to its homogeneous representation by appending a `1' to the vector.
+@refill
+
+@end quotation
+
+@c 
+@c Index
+@c
+@iftex
+@unnumbered Index
+@printindex cp
+@end iftex
+
+@bye
